@@ -4,9 +4,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-
-contract Auction {
+contract Auction is IERC721Receiver {
     // static
     IERC20 public token;
     IERC721 public erc721Instance;
@@ -29,6 +29,7 @@ contract Auction {
     event LogBid(address bidder, uint bid, address highestBidder, uint highestBid, uint highestBindingBid);
     event LogWithdrawal(address withdrawer, address withdrawalAccount, uint amount);
     event LogCanceled();
+    event StartAuction(uint256 tokenID, IERC721 erc721Instance, uint bidIncrement, uint32 duration);
 
     modifier onlyOwner {
         require(msg.sender == owner, "Msg.sender is not owner");
@@ -56,20 +57,32 @@ contract Auction {
     }
 
     modifier onlyEndedOrCanceled {
-        require(auctionState == states.End || auctionState == states.Canceled);
+        require(auctionState == states.End || auctionState == states.Canceled, "incorrect auction state");
         _;
     }
 
     constructor (IERC20 _token) {
         token = _token;
+        owner = msg.sender;
+    }
+
+     function onERC721Received(
+        address _operator,
+        address _from,
+        uint256 _tokenId,
+        bytes calldata _data
+    ) external returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 
     function startAuction(uint _bidIncrement, uint32 _duration, uint256 _tokenID, address _tokenNFTAddress)  public {
-
+        require(_tokenNFTAddress != address(0), "Address can't be 0");
         tokenID = _tokenID;
         erc721Instance = IERC721(_tokenNFTAddress);
         bidIncrement = _bidIncrement;
         duration = _duration;
+        auctionState = states.Started;
+        emit StartAuction(tokenID, erc721Instance, bidIncrement, duration);
     }
 
     function getHighestBid() public view returns (uint) {
@@ -86,7 +99,7 @@ contract Auction {
         // reject payments of 0 ETH
         require(_amount != 0, "Auction: Amount == 0");
         require(token.allowance(msg.sender, address(this)) >= _amount, "Auction: amount is not enough");
-
+        
         // calculate the user's total bid based on the current amount they've sent to the contract
         // plus whatever has been sent with this transaction 
         uint newBid = fundsByBidder[msg.sender] + _amount;
