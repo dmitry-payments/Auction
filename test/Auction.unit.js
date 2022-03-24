@@ -1,6 +1,6 @@
 const { advanceBlockAndSetTime } = require('./helpers/standingTheTime');
-const { expect, assert } = require('chai'); //expect - проверка
-const { expectRevert, expectEvent, BN } = require('@openzeppelin/test-helpers'); // expectRevert - ожидание того что транзакция будет отклонена, expectEvent - ожидание эвента
+const { expect, assert } = require('chai');
+const { expectRevert, expectEvent, BN } = require('@openzeppelin/test-helpers'); 
 const { web3 } = require('@openzeppelin/test-helpers/src/setup'); //web3 - blockchain
 const { MAX_UINT256 } = require('@openzeppelin/test-helpers/src/constants');
 //const { artifacts } = require('hardhat');
