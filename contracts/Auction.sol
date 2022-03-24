@@ -176,8 +176,6 @@ contract Auction is IERC721Receiver {
             // the auction finished without being canceled
 
             if (msg.sender == owner) { //овнер нфт
-                // а что бы изменилось если бы не было 3 стороны которая устраивает аукцион, овнер бы 
-                //точно так же получал деньги по-моему, только был бы и овнером нфт и овнером аукциона
                 // the auction's owner should be allowed to withdraw the highestBindingBid
                 withdrawalAccount = msg.sender;
                 withdrawalAmount = highestBindingBid;
@@ -211,8 +209,7 @@ contract Auction is IERC721Receiver {
         fundsByBidder[withdrawalAccount] -= withdrawalAmount;
 
         // send the funds
-        token.transfer(withdrawalAccount, withdrawalAmount); //объект msg.sender вызывает функцию send от базового класса 
-        //и отправляет сумму себе на счет? this.transfer(msg.sender) - почему не так? 
+        token.transfer(withdrawalAccount, withdrawalAmount); //объект msg.sender вызывает функцию send от базового класса
 
         emit LogWithdrawal(msg.sender, withdrawalAccount, withdrawalAmount);
 
